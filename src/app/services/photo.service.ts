@@ -3,7 +3,7 @@ import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 import { Platform } from '@ionic/angular';
-import { Capacitor } from '@capacitor/core';  // Import Capacitor from the correct package
+import { Capacitor } from '@capacitor/core';
 
 export interface UserPhoto {
   filepath: string;
@@ -111,5 +111,25 @@ export class PhotoService {
         }
       }
     }
+  }
+
+  // Delete a photo
+  public async deletePicture(photo: UserPhoto, position: number) {
+    // Remove this photo from the Photos reference data array
+    this.photos.splice(position, 1);
+
+    // Update photos array cache by overwriting the existing photo array
+    await Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+    // Delete photo file from filesystem
+    const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
+
+    await Filesystem.deleteFile({
+      path: filename,
+      directory: Directory.Data,
+    });
   }
 }
