@@ -9,9 +9,12 @@ const config: CapacitorConfig = {
       appId: 'e05331c6',
       channel: 'Production',
       autoUpdateMethod: 'background',
-      maxVersions: 2
-    }
-  }
+      maxVersions: 2,
+    },
+    Camera: {
+      saveToGallery: true, // Ensure it's enabled
+    },
+  },
 };
 
 export default config;
