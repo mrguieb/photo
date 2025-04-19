@@ -45,33 +45,22 @@ export class PhotoService {
       directory: Directory.Data,
     });
 
-    if (this.platform.is('hybrid')) {
-      return {
-        filepath: savedFile.uri,
-        webviewPath: Capacitor.convertFileSrc(savedFile.uri),
-      };
-    } else {
-      return {
-        filepath: fileName,
-        webviewPath: photo.webPath,
-      };
-    }
+    return this.platform.is('hybrid')
+      ? {
+          filepath: fileName,
+          webviewPath: Capacitor.convertFileSrc(savedFile.uri),
+        }
+      : {
+          filepath: fileName,
+          webviewPath: photo.webPath,
+        };
   }
 
   private async readAsBase64(photo: Photo): Promise<string> {
-    if (this.platform.is('hybrid')) {
-      const file = await Filesystem.readFile({
-        path: photo.path!,
-        directory: Directory.Data,
-      });
-      return file.data as string;
-    } else {
-      const response = await fetch(photo.webPath!);
-      const blob = await response.blob();
-      return await this.convertBlobToBase64(blob) as string;
-    }
+    const response = await fetch(photo.webPath!);
+    const blob = await response.blob();
+    return await this.convertBlobToBase64(blob) as string;
   }
-  
 
   private convertBlobToBase64 = (blob: Blob) =>
     new Promise((resolve, reject) => {
@@ -85,24 +74,19 @@ export class PhotoService {
     const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
     this.photos = (value ? JSON.parse(value) : []) as UserPhoto[];
 
-    if (this.platform.is('hybrid')) {
-      for (let photo of this.photos) {
-        const fileName = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
+    for (let photo of this.photos) {
+      if (this.platform.is('hybrid')) {
         const fileUri = await Filesystem.getUri({
-          path: fileName,
+          path: photo.filepath,
           directory: Directory.Data,
         });
         photo.webviewPath = Capacitor.convertFileSrc(fileUri.uri);
-        photo.filepath = fileUri.uri;
-      }
-    } else {
-      for (let photo of this.photos) {
+      } else {
         try {
           const readFile = await Filesystem.readFile({
             path: photo.filepath,
             directory: Directory.Data,
           });
-
           photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
         } catch (error) {
           console.warn('Failed to read photo from filesystem', error);
@@ -119,10 +103,8 @@ export class PhotoService {
       value: JSON.stringify(this.photos),
     });
 
-    const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
-
     await Filesystem.deleteFile({
-      path: filename,
+      path: photo.filepath,
       directory: Directory.Data,
     });
   }
