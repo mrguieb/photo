@@ -17,22 +17,25 @@ export class Tab3Page implements AfterViewInit {
   private markers: any[] = [];
 
   async ngAfterViewInit() {
+    // Wait until platform is ready (important for Android)
     await this.initializeMap();
   }
 
   async initializeMap() {
+    // Request current location
     const coordinates = await Geolocation.getCurrentPosition();
     const position = {
       lat: coordinates.coords.latitude,
       lng: coordinates.coords.longitude
     };
 
+    // Initialize Google Map
     this.map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
       center: position,
       zoom: 15
     });
 
-    // Initial marker at current location
+    // Add initial marker at current location
     const currentLocationMarker = new google.maps.Marker({
       position,
       map: this.map,
@@ -41,12 +44,13 @@ export class Tab3Page implements AfterViewInit {
 
     this.markers.push(currentLocationMarker);
 
-    // Enable adding markers by clicking the map
+    // Enable adding custom markers by clicking the map
     google.maps.event.addListener(this.map, 'click', (event: any) => {
       this.addCustomMarker(event.latLng);
     });
   }
 
+  // Refresh location and move map center
   async refreshLocation() {
     const coordinates = await Geolocation.getCurrentPosition();
     const position = {
@@ -56,7 +60,7 @@ export class Tab3Page implements AfterViewInit {
 
     this.map.setCenter(position);
 
-    // Optional: Remove all previous markers and add a new one
+    // Clear existing markers and add a new one
     this.clearMarkers();
 
     const refreshedMarker = new google.maps.Marker({
@@ -68,6 +72,7 @@ export class Tab3Page implements AfterViewInit {
     this.markers.push(refreshedMarker);
   }
 
+  // Add a custom marker at the clicked position
   addCustomMarker(latLng: any) {
     const marker = new google.maps.Marker({
       position: latLng,
@@ -79,6 +84,7 @@ export class Tab3Page implements AfterViewInit {
     this.markers.push(marker);
   }
 
+  // Add marker at the center of the map
   addMarkerAtCenter() {
     if (!this.map) return;
 
@@ -91,6 +97,7 @@ export class Tab3Page implements AfterViewInit {
     this.addCustomMarker(latLng);
   }
 
+  // Clear all markers from the map
   clearMarkers() {
     this.markers.forEach(marker => marker.setMap(null));
     this.markers = [];

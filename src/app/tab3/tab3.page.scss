@@ -1,12 +1,23 @@
 #map {
     width: 100%;
-    height: 80vh;
-    border-radius: 10px;
-    border: 2px solid #3880ff;
-    margin: 10px 0;
+    height: calc(100vh - 60px); /* Adjust height based on toolbar */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    border: 5px solid #0011ff; /* Add border */
+    border-radius: 10px; /* Optional: Add rounded corners */
   }
   
   .refresh-button {
-    margin: -90px 110px;
+    position: absolute;
+    bottom: 70px; /* Adjust this value depending on your button's size */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  
+  ion-fab {
+    z-index: 10;
   }
   
