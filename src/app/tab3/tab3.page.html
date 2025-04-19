@@ -1,9 +1,24 @@
 <ion-header>
   <ion-toolbar>
-  <ion-title>My Location</ion-title>
+    <ion-title>My Location</ion-title>
   </ion-toolbar>
-  </ion-header>
-  
-  <ion-content>
-  <div id="map" style="height: 100%;"></div>
-  </ion-content>
+</ion-header>
+
+<ion-content>
+
+  <!-- Map Container -->
+  <div id="map"></div>
+
+  <!-- Refresh Location Button -->
+  <ion-button expand="full" color="primary" (click)="refreshLocation()" class="refresh-button">
+    Refresh Location
+  </ion-button>
+
+  <!-- Add Marker at Center Button -->
+  <ion-fab vertical="bottom" horizontal="center" slot="fixed">
+    <ion-fab-button (click)="addMarkerAtCenter()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>
