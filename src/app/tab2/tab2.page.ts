@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActionSheetController } from '@ionic/angular';
+import { ActionSheetController, GestureController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { PhotoService, UserPhoto } from '../services/photo.service';
 
 @Component({
@@ -11,7 +12,9 @@ import { PhotoService, UserPhoto } from '../services/photo.service';
 export class Tab2Page implements OnInit {
   constructor(
     public photoService: PhotoService,
-    public actionSheetController: ActionSheetController
+    public actionSheetController: ActionSheetController,
+    private gestureCtrl: GestureController,
+    private router: Router
   ) {}
 
   async ngOnInit() {
@@ -43,5 +46,29 @@ export class Tab2Page implements OnInit {
     });
 
     await actionSheet.present();
+  }
+
+  ionViewDidEnter() {
+    const contentElement = document.querySelector('ion-content');
+    if (contentElement) {
+      const gesture = this.gestureCtrl.create({
+        el: contentElement,
+        gestureName: 'swipe-tabs',
+        onEnd: (ev) => {
+          if (ev.deltaX > -200) {
+            // Swipe right to Tab 1
+            this.router.navigateByUrl('/tabs/tab1');
+          } else if (ev.deltaX < -100) {
+            // Swipe left to Tab 3
+            this.router.navigateByUrl('/tabs/tab3');
+          }
+          
+        }
+      });
+
+      gesture.enable();
+    } else {
+      console.error('ion-content element not found!');
+    }
   }
 }

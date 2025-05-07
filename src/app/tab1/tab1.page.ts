@@ -23,7 +23,7 @@ export class Tab1Page implements AfterViewInit {
         gestureName: 'swipe-tabs',
         onEnd: (ev) => {
           // Check if the swipe is sufficiently leftward
-          if (ev.deltaX < -100) {
+          if (ev.deltaX <-100) {
             this.router.navigateByUrl('/tabs/tab2'); // Swipe left to Tab2
           }
         }
