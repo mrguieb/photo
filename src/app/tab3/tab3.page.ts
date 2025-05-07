@@ -22,27 +22,35 @@ export class Tab3Page implements AfterViewInit {
     private router: Router
   ) {}
 
-  // Wait until platform is ready (important for Android)
   async ngAfterViewInit() {
-    await this.initializeMap();
-    this.setupSwipeGesture();
+    try {
+      await this.initializeMap(); // this will trigger the browser's location prompt
+      this.setupSwipeGesture();
+    } catch (error) {
+      console.error('Location permission denied or unavailable:', error);
+      alert(
+        'Location permission is required to use the map features. Please enable location access in your browser settings.'
+      );
+    }
   }
 
   // Initialize Google Map with current location
   async initializeMap() {
-    const coordinates = await Geolocation.getCurrentPosition();
+    const coordinates = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    });
+
     const position = {
       lat: coordinates.coords.latitude,
       lng: coordinates.coords.longitude
     };
 
-    // Initialize the map
     this.map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
       center: position,
       zoom: 15
     });
 
-    // Add initial marker at current location
     const currentLocationMarker = new google.maps.Marker({
       position,
       map: this.map,
@@ -51,7 +59,6 @@ export class Tab3Page implements AfterViewInit {
 
     this.markers.push(currentLocationMarker);
 
-    // Enable adding custom markers by clicking the map
     google.maps.event.addListener(this.map, 'click', (event: any) => {
       this.addCustomMarker(event.latLng);
     });
@@ -59,24 +66,33 @@ export class Tab3Page implements AfterViewInit {
 
   // Refresh location and move map center
   async refreshLocation() {
-    const coordinates = await Geolocation.getCurrentPosition();
-    const position = {
-      lat: coordinates.coords.latitude,
-      lng: coordinates.coords.longitude
-    };
+    try {
+      const coordinates = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+      });
 
-    this.map.setCenter(position);
+      const position = {
+        lat: coordinates.coords.latitude,
+        lng: coordinates.coords.longitude
+      };
 
-    // Clear existing markers and add a new one
-    this.clearMarkers();
+      this.map.setCenter(position);
+      this.clearMarkers();
 
-    const refreshedMarker = new google.maps.Marker({
-      position,
-      map: this.map,
-      title: "You are here!"
-    });
+      const refreshedMarker = new google.maps.Marker({
+        position,
+        map: this.map,
+        title: "You are here!"
+      });
 
-    this.markers.push(refreshedMarker);
+      this.markers.push(refreshedMarker);
+    } catch (error) {
+      console.error('Error refreshing location:', error);
+      alert(
+        'Unable to get your location. Please make sure location services are enabled in your browser or device settings.'
+      );
+    }
   }
 
   // Add a custom marker at the clicked position
@@ -113,16 +129,16 @@ export class Tab3Page implements AfterViewInit {
   // Set up swipe gesture to switch tabs
   setupSwipeGesture() {
     const contentElement = document.querySelector('ion-content');
-    
-    if (contentElement) {  // Check if the element is found
+
+    if (contentElement) {
       const gesture = this.gestureCtrl.create({
-        el: contentElement as Node,  // Ensure that it's treated as a Node
+        el: contentElement as Node,
         gestureName: 'swipe-tabs',
         onEnd: ev => {
           if (ev.deltaX < -100) {
-            this.router.navigateByUrl('/tabs/tab2'); // swipe left to tab2
+            this.router.navigateByUrl('/tabs/tab2');
           } else if (ev.deltaX > 100) {
-            this.router.navigateByUrl('/tabs/tab1'); // swipe right to tab1
+            this.router.navigateByUrl('/tabs/tab1');
           }
         }
       });
