@@ -1,6 +1,7 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, GestureController } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 // Declare google object globally for TypeScript
 declare var google: any;
@@ -16,20 +17,26 @@ export class Tab3Page implements AfterViewInit {
   private map: any;
   private markers: any[] = [];
 
+  constructor(
+    private gestureCtrl: GestureController,
+    private router: Router
+  ) {}
+
+  // Wait until platform is ready (important for Android)
   async ngAfterViewInit() {
-    // Wait until platform is ready (important for Android)
     await this.initializeMap();
+    this.setupSwipeGesture();
   }
 
+  // Initialize Google Map with current location
   async initializeMap() {
-    // Request current location
     const coordinates = await Geolocation.getCurrentPosition();
     const position = {
       lat: coordinates.coords.latitude,
       lng: coordinates.coords.longitude
     };
 
-    // Initialize Google Map
+    // Initialize the map
     this.map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
       center: position,
       zoom: 15
@@ -101,5 +108,27 @@ export class Tab3Page implements AfterViewInit {
   clearMarkers() {
     this.markers.forEach(marker => marker.setMap(null));
     this.markers = [];
+  }
+
+  // Set up swipe gesture to switch tabs
+  setupSwipeGesture() {
+    const contentElement = document.querySelector('ion-content');
+    
+    if (contentElement) {  // Check if the element is found
+      const gesture = this.gestureCtrl.create({
+        el: contentElement as Node,  // Ensure that it's treated as a Node
+        gestureName: 'swipe-tabs',
+        onEnd: ev => {
+          if (ev.deltaX < -100) {
+            this.router.navigateByUrl('/tabs/tab2'); // swipe left to tab2
+          } else if (ev.deltaX > 100) {
+            this.router.navigateByUrl('/tabs/tab1'); // swipe right to tab1
+          }
+        }
+      });
+      gesture.enable();
+    } else {
+      console.error('ion-content element not found!');
+    }
   }
 }
